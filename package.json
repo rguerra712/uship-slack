@@ -17,7 +17,7 @@
     "build": "faaslang",
     "name": "ricephilip/rivership-cr",
     "timeout": 10000,
-    "publish": true,
+    "publish": false,
     "personalize": {
       "keys": [],
       "user": []
