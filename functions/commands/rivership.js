@@ -82,6 +82,6 @@ module.exports = (user_name, channel_name, text = '', command = "", botToken = n
       //.catch(error => callCallback(`I'm not sure. Geek stuff here: ${JSON.stringify(input)} ${JSON.stringify(error)}`));
   }
   else {
-    callCallback(`${JSON.stringify(command)}`);
+    callCallback(`Ask me \`where <someone | some room>\` is or ask me \`what's for lunch <optional day>\`.`);
   }
 };
