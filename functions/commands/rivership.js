@@ -25,11 +25,9 @@ function getDay(text) {
   for (var dayIndex in days) {
     var day = days[dayIndex];
     if (text.indexOf(day) !== -1) {
-      console.log(days[dayIndex]);
       return days[dayIndex];
     }
   }
-  console.log(`day: {none}`)
   return;
 }
 
@@ -73,13 +71,9 @@ module.exports = (user_name, channel_name, text = '', command = "", botToken = n
   else if (command == 'where') {
     if (tokens[1] == 'is') {
       input = tokens.slice(2).join(' ');
-      console.log("in where is");
-      console.log(input);
     }
     else {
       input = tokens.slice(1).join(' ');
-      console.log("in where");
-      console.log(input);
     }
 
     rivership.whereIs(input)
