@@ -1,36 +1,37 @@
 const lib = require('lib')({token: process.env.STDLIB_TOKEN});
+const rivership = require('rivership-functions');
 
-let rooms = {
-  "lone star": "the smaller board room up front on the first floor",
-  "texas": "the big conference room up front on the first floor",
-  "fredericksburg": "the room behind the reception area on the first floor",
-  "spicewood": "the room by the stairs on the first floor",
-  "zilker park": "the small one on one room on the first floor",
-  "barton springs": "the small one on one room on the first floor",
-  "capitol": "the small one on one room on the second floor",
-  "pennybacker": "the room by finance on the third floor",
-  "lake travis": "the room outside the mens bathroom on the third floor",
-  "new braunfels": "the room in the center of the building on the first floor",
-  "austin": "the room in the center of the building on the second floor",
-  "round rock": "the room in the center of the building on the third floor"
-};
+let days = [
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+  "sunday",
+  "tomorrow"
+];
 
-function getConferenceRoom(room) {
-  let found = sanitizeRoom(room);
-	if (found) {
-  	return `${room}? That is ${found}`;
-  }
-  return `I don't know which room that is: ${room}`;
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-function sanitizeRoom(room) {
-  room = room.toLowerCase();
-  if (room.startsWith('cr_')){
-    room = room.substring(3);
-  }
-  return rooms[room];
+function isLunchQuery(text) {
+  var isLunch = text.toLowerCase().indexOf('lunch') !== -1;
+  return isLunch;
 }
 
+function getDay(text) {
+  for (var dayIndex in days) {
+    var day = days[dayIndex];
+    if (text.indexOf(day) !== -1) {
+      console.log(days[dayIndex]);
+      return days[dayIndex];
+    }
+  }
+  console.log(`day: {none}`)
+  return;
+}
 
 /**
 * /rivership command to ask where a conference room is
@@ -45,18 +46,48 @@ function sanitizeRoom(room) {
 * @returns {object}
 */
 module.exports = (user_name, channel_name, text = '', command = "", botToken = null, callback) => {
-  let message = '';
-  if (text){
-    message = getConferenceRoom(text);
+  let callCallback = message => {
+    callback(null, {
+        response_type: 'in_channel',
+        text: `@${user_name}: ${message}`
+      });
+  }
+  var tokens = text.split(' ');
+  var command = tokens[0].toLowerCase();
+  var input = '';
+
+  
+  if (isLunchQuery(text)) {
+    var day = getDay(text);
+    if (day) {
+      rivership.whatIsLunch(day)
+        .then(result => callCallback(`${capitalizeFirstLetter(day)}'s Lunch: ${result}`))
+        .catch(error => callCallback(`I'm not sure what's for lunch on: ${day}.`));
+    }
+    else {
+      rivership.whatIsLunch()
+        .then(result => callCallback(`Today's Lunch: ${result}`))
+        .catch(error => callCallback(`I'm not sure what's for lunch today.`));
+    }
+  } 
+  else if (command == 'where') {
+    if (tokens[1] == 'is') {
+      input = tokens.slice(2).join(' ');
+      console.log("in where is");
+      console.log(input);
+    }
+    else {
+      input = tokens.slice(1).join(' ');
+      console.log("in where");
+      console.log(input);
+    }
+
+    rivership.whereIs(input)
+      .then(result => callCallback(`${input}? ${result}`))
+      .catch(error => callCallback(`I'm not sure.`));
+      //.catch(error => callCallback(`I'm not sure. Geek stuff here: ${JSON.stringify(input)} ${JSON.stringify(error)}`));
   }
   else {
-    message = "You need to tell me a room name, silly.";
+    callCallback(`${JSON.stringify(command)}`);
   }
-    
-
-  callback(null, {
-    response_type: 'ephemeral',
-    text: `${message}`
-  });
-
 };
